@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/act1"
+        android:icon="@drawable/ic_crop"
+        android:orderInCategory="100"
+        android:title="@string/m_serach_bar_label_menu"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/act2"
+        android:icon="@drawable/ic_color"
+        android:orderInCategory="100"
+        android:title="@string/m_serach_bar_label_menu"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/act3"
+        android:icon="@drawable/ic_color"
+        android:orderInCategory="100"
+        android:title="@string/m_serach_bar_label_menu"
+        app:showAsAction="always" />
+
+</menu>

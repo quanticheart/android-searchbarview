@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SearchBar">
+        <attr name="addMenu" format="reference" />
+        <attr name="iconSearch" format="reference" />
+        <attr name="iconClose" format="reference" />
+        <attr name="searchHint" format="string" />
+    </declare-styleable>
+</resources>

@@ -19,6 +19,7 @@
             android:id="@+id/menuToolbarSearch"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:layout_marginRight="5dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@+id/menuSearchTollbarControl"
@@ -41,25 +42,39 @@
         android:id="@+id/mSearchToolbarLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/colorPrimaryDark"
+        android:background="@color/white"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
 
         <ImageView
-            android:id="@+id/menuSearchClose"
+            android:id="@+id/menuSearchGo"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_marginLeft="10dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="4dp"
-            android:src="@drawable/ic_close_searchbar"
+            android:src="@drawable/m_ic_back"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="RtlHardcoded" />
+
+        <EditText
+            android:id="@+id/mSearchEditText"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:backgroundTint="@color/white"
+            android:hint="Search"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            app:layout_constraintBottom_toBottomOf="@+id/mSearchToolbarLayout"
+            app:layout_constraintLeft_toRightOf="@+id/menuSearchGo"
+            app:layout_constraintRight_toLeftOf="@+id/menuSearchTollbarControl2"
+            app:layout_constraintTop_toTopOf="@+id/mSearchToolbarLayout" />
 
         <ImageView
             android:id="@+id/menuSearchTollbarControl2"
