@@ -5,5 +5,9 @@
         <attr name="iconSearch" format="reference" />
         <attr name="iconClose" format="reference" />
         <attr name="searchHint" format="string" />
+        <attr name="showSearch" format="boolean" />
+        <attr name="toolbarTitle" format="string" />
+        <attr name="backAction" format="boolean" />
+        <attr name="iconBack" format="reference" />
     </declare-styleable>
 </resources>

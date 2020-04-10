@@ -17,46 +17,96 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.TextView
-import androidx.appcompat.widget.Toolbar
-import kotlinx.android.synthetic.main.m_toobar.view.*
+import kotlinx.android.synthetic.main.m_searchbar_layout.view.*
 import kotlin.math.hypot
-
 
 class SearchBar @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private var mInflater: LayoutInflater? = null
+
+    /**
+     * Menu inflate
+     */
+    private var menuRes: Int? = null
+    private var menuItemClickListener: ((Int) -> Unit)? = null
+
     /**
      * EditText
      */
+    private var editTextHint = "Search"
+
+    /**
+     * Toolbar
+     */
+    private var toolbarTitle = ""
+    private var toolbarBackAction = false
+
+    /**
+     * Status SearchBar
+     */
+    private var searchStatus = true
+
     /**
      * Menu
      */
     private var textChangeClickListener: ((String) -> Unit)? = null
-    private var menuItemClickListener: ((Int) -> Unit)? = null
     private var callbackBackClickListener: (() -> Unit)? = null
-    private var menuRes: Int? = null
+
 
     /**
      * Menu Actions Icons
      */
-    private var iconSearch = R.drawable.m_search_bar_icon
-    private var iconSearchClose = R.drawable.ic_close_searchbar
+    private var iconSearch = R.drawable.m_ic_search_searchbar
+    private var iconSearchClose = R.drawable.m_ic_close_searchbar
+    private var iconBack = 0
 
     init {
         mInflater = LayoutInflater.from(context)
-        mInflater?.inflate(R.layout.m_toobar, this, true)
+        mInflater?.inflate(R.layout.m_searchbar_layout, this, true)
 
         /**
          * Attrs
          */
         attrs?.let {
+
+            /**
+             * Menu inflate
+             */
             val typedArray = context.obtainStyledAttributes(attrs, R.styleable.SearchBar)
             if (typedArray.hasValue(R.styleable.SearchBar_addMenu)) {
                 menuRes = typedArray.getResourceId(R.styleable.SearchBar_addMenu, 0)
             }
 
+            /**
+             * EditText
+             */
+            if (typedArray.hasValue(R.styleable.SearchBar_searchHint)) {
+                editTextHint = typedArray.getString(R.styleable.SearchBar_searchHint) ?: "Search"
+            }
+
+            /**
+             * Toolbar
+             */
+            if (typedArray.hasValue(R.styleable.SearchBar_toolbarTitle)) {
+                toolbarTitle = typedArray.getString(R.styleable.SearchBar_toolbarTitle) ?: ""
+            }
+
+            if (typedArray.hasValue(R.styleable.SearchBar_backAction)) {
+                toolbarBackAction = typedArray.getBoolean(R.styleable.SearchBar_backAction, false)
+            }
+
+            /**
+             * Status SearchBar
+             */
+            if (typedArray.hasValue(R.styleable.SearchBar_showSearch)) {
+                searchStatus = typedArray.getBoolean(R.styleable.SearchBar_showSearch, searchStatus)
+            }
+
+            /**
+             * Icons
+             */
             if (typedArray.hasValue(R.styleable.SearchBar_iconSearch)) {
                 iconSearch = typedArray.getResourceId(R.styleable.SearchBar_iconSearch, 0)
             }
@@ -65,102 +115,108 @@ class SearchBar @JvmOverloads constructor(
                 iconSearchClose = typedArray.getResourceId(R.styleable.SearchBar_iconClose, 0)
             }
 
-            if (typedArray.hasValue(R.styleable.SearchBar_searchHint)) {
-                mSearchEditText.hint = typedArray.getString(R.styleable.SearchBar_searchHint)
+            if (typedArray.hasValue(R.styleable.SearchBar_iconBack)) {
+                iconBack = typedArray.getResourceId(R.styleable.SearchBar_iconBack, 0)
             }
             typedArray.recycle()
         }
 
         /**
-         * Menu
+         * Menu inflate
          */
-
-        menuRes?.let { res ->
-            if (res != 0) {
-                menuToolbarSearch.apply {
-                    inflateMenu(res)
-                    setOnMenuItemClickListener {
-                        menuItemClickListener?.let { it1 -> it1(it.itemId) }
-                        true
-                    }
-                }
-            }
-        }
-
-        menuSearch.setImageDrawable(context.getDrawable(iconSearchClose))
-        menuSearch.setImageDrawable(context.getDrawable(iconSearch))
+        menuRes?.let { inflateMenu(it) }
 
         /**
-         * Search Text
+         * EditText
          */
+        setSearchHint(editTextHint)
 
-        mSearchEditText.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-            }
+        mLayoutSearchBarEditText.keyActionDoneListener {
+            textChangeClickListener?.let { it(mLayoutSearchBarEditText.text.toString()) }
+            showToolbar()
+        }
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+        /**
+         * Toolbar
+         */
+        if (toolbarTitle.isNotEmpty()) setToolbarTitle(toolbarTitle)
 
-            }
+        if (iconBack != 0) setToolbarBackIcon(iconBack)
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            }
-        })
+        mSearchBarToolbar.setNavigationOnClickListener { callbackBackClickListener?.let { it1 -> it1() } }
 
         /**
          * Search Go
          */
-
-        menuSearchGo.setOnClickListener {
-            textChangeClickListener?.let { it(mSearchEditText.text.toString()) }
-            closeSearch()
+        mLayoutSearchBarBack.setOnClickListener {
+            textChangeClickListener?.let { it(mLayoutSearchBarEditText.text.toString()) }
+            showToolbar()
         }
 
         /**
-         * Menu Icon Actions
+         * init
          */
+        if (searchStatus) showToolbar(false) else showSearchBar(false)
 
-        menuSearch.setOnClickListener {
+        mSearchBarBtnAction.setOnClickListener {
             searchMenu()
         }
+    }
 
-        /**
-         * Edittext
-         */
+    /**
+     * Menu inflate and Actions
+     */
 
-        mSearchEditText.keyActionDoneListener {
-            textChangeClickListener?.let { it(mSearchEditText.text.toString()) }
-            closeSearch()
+    fun inflateMenu(menuResID: Int) {
+        if (menuResID != 0) {
+            mSearchBarToolbar.apply {
+                inflateMenu(menuResID)
+                setOnMenuItemClickListener {
+                    menuItemClickListener?.let { it1 -> it1(it.itemId) }
+                    true
+                }
+            }
         }
-
-        menuToolbarSearch.title = "Testes"
-//        menuToolbarSearch.navigationIcon = context.resources.getDrawable(R.drawable.m_ic_back, null)
-        menuToolbarSearch.setNavigationOnClickListener { callbackBackClickListener?.let { it1 -> it1() } }
-    }
-
-    private fun toolbarAction(
-        toolbar: Toolbar,
-        context: Context,
-        toolbarTitle: String?
-    ) {
-        val bar = toolbar
-        toolbarTitle?.let {
-            bar?.title = it
-        } ?: run { }
-
-        toolbar.navigationIcon = context.resources.getDrawable(R.drawable.m_ic_back, null)
-        toolbar.setNavigationOnClickListener { callbackBackClickListener?.let { it1 -> it1() } }
-    }
-
-    fun setBackClickListener(callback: () -> Unit) {
-        callbackBackClickListener = callback
     }
 
     fun setMenuOnClickListener(callback: (Int) -> Unit) {
         menuItemClickListener = callback
     }
 
-    fun setSearchTextListener(callback: (String) -> Unit) {
+    /**
+     * EditText Actions
+     */
+
+    fun setSearchHint(hint: String) {
+        mLayoutSearchBarEditText?.hint = hint
+    }
+
+    fun setSearchTextOkListener(callback: (String) -> Unit) {
         textChangeClickListener = callback
+    }
+
+    fun setSearchTextListener(callback: (String) -> Unit) {
+        mLayoutSearchBarEditText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                callback(s.toString())
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+        })
+    }
+
+    private fun EditText.openKeyboard() {
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+        imm?.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+    }
+
+    private fun EditText.closeKeyboard() {
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+        imm?.hideSoftInputFromWindow(this.windowToken, 0)
     }
 
     private fun EditText?.keyActionDoneListener(action: () -> Unit) {
@@ -173,85 +229,109 @@ class SearchBar @JvmOverloads constructor(
     }
 
     /**
-     * Menu Actions, show and hide
+     * Toolbar
      */
-    private var searchStatus = false
+    fun setToolbarTitle(toolbarTitle: String) {
+        mSearchBarToolbar?.title = toolbarTitle
+    }
 
-    private fun searchMenu() = if (searchStatus) closeSearch() else openSearch()
+    fun setToolbarBackIcon(iconResId: Int) {
+        mSearchBarToolbar.navigationIcon = context.resources.getDrawable(iconResId, null)
+    }
 
-    fun openSearch() {
-        menuSearch.isEnabled = false
-        menuSearch.setImageDrawable(context.getDrawable(iconSearchClose))
-        mSearchEditText.apply {
+    fun setBackClickListener(callback: () -> Unit) {
+        callbackBackClickListener = callback
+    }
+
+    /**
+     * Status SearchBar
+     */
+    private fun searchMenu() = if (searchStatus) showToolbar() else showSearchBar()
+
+    fun showSearchBar(animation: Boolean = true) {
+        /**
+         * set actions
+         */
+        searchStatus = true
+        mSearchBarBtnAction.apply {
+            isEnabled = false
+            setImageDrawable(context.getDrawable(iconSearchClose))
+        }
+
+        mLayoutSearchBarEditText.apply {
             requestFocus()
             openKeyboard()
         }
 
-        val x: Int = menuSearchCenter.x.toInt()
-        val y: Int = menuSearchCenter.y.toInt()
+        if (animation) {
+            val x: Int = mSearchBarBtnActionCenter.x.toInt()
+            val y: Int = mSearchBarBtnActionCenter.y.toInt()
 
-        val startRadius = 0
-        val endRadius = hypot(width.toDouble(), height.toDouble()).toInt()
+            val startRadius = 0
+            val endRadius = hypot(width.toDouble(), height.toDouble()).toInt()
 
-        val anim = ViewAnimationUtils.createCircularReveal(
-            mSearchToolbarLayout, x, y, startRadius.toFloat(), endRadius.toFloat()
-        )
+            val anim = ViewAnimationUtils.createCircularReveal(
+                mLayoutSearchBar, x, y, startRadius.toFloat(), endRadius.toFloat()
+            )
+            anim.addListener(object : AnimatorListener {
+                override fun onAnimationStart(animator: Animator) {}
+                override fun onAnimationEnd(animator: Animator) {
+                    mLayoutToolbar.visibility = View.GONE
+                    mSearchBarBtnAction.isEnabled = true
+                }
 
-        anim.addListener(object : AnimatorListener {
-            override fun onAnimationStart(animator: Animator) {}
-            override fun onAnimationEnd(animator: Animator) {
-                mSearchToolbar.visibility = View.GONE
-                menuSearch.isEnabled = true
-            }
-
-            override fun onAnimationCancel(animator: Animator) {}
-            override fun onAnimationRepeat(animator: Animator) {}
-        })
-        mSearchToolbarLayout.visibility = View.VISIBLE
-        anim.start()
-        searchStatus = true
+                override fun onAnimationCancel(animator: Animator) {}
+                override fun onAnimationRepeat(animator: Animator) {}
+            })
+            mLayoutSearchBar.visibility = View.VISIBLE
+            anim.start()
+        } else {
+            mLayoutToolbar.visibility = View.GONE
+            mSearchBarBtnAction.isEnabled = true
+        }
     }
 
-    fun closeSearch() {
-        menuSearch.isEnabled = false
-        mSearchToolbar.visibility = View.VISIBLE
-        menuSearch.setImageDrawable(context.getDrawable(iconSearch))
-        mSearchEditText.apply {
+    fun showToolbar(animation: Boolean = true) {
+        /**
+         * set actions
+         */
+        searchStatus = false
+        mLayoutToolbar.visibility = View.VISIBLE
+
+        mSearchBarBtnAction.apply {
+            isEnabled = false
+            setImageDrawable(context.getDrawable(iconSearch))
+        }
+
+        mLayoutSearchBarEditText.apply {
             clearFocus()
             closeKeyboard()
         }
 
-        val x: Int = menuSearchCenter.x.toInt()
-        val y: Int = menuSearchCenter.y.toInt()
+        if (animation) {
+            val x: Int = mSearchBarBtnActionCenter.x.toInt()
+            val y: Int = mSearchBarBtnActionCenter.y.toInt()
+            val startRadius = hypot(width.toDouble(), height.toDouble()).toInt()
+            val endRadius = 0
 
-        val startRadius = hypot(width.toDouble(), height.toDouble()).toInt()
-        val endRadius = 0
+            val anim = ViewAnimationUtils.createCircularReveal(
+                mLayoutSearchBar, x, y, startRadius.toFloat(), endRadius.toFloat()
+            )
 
-        val anim = ViewAnimationUtils.createCircularReveal(
-            mSearchToolbarLayout, x, y, startRadius.toFloat(), endRadius.toFloat()
-        )
+            anim.addListener(object : AnimatorListener {
+                override fun onAnimationStart(animator: Animator) {}
+                override fun onAnimationEnd(animator: Animator) {
+                    mLayoutSearchBar.visibility = View.GONE
+                    mSearchBarBtnAction.isEnabled = true
+                }
 
-        anim.addListener(object : AnimatorListener {
-            override fun onAnimationStart(animator: Animator) {}
-            override fun onAnimationEnd(animator: Animator) {
-                mSearchToolbarLayout.visibility = View.GONE
-                menuSearch.isEnabled = true
-            }
-
-            override fun onAnimationCancel(animator: Animator) {}
-            override fun onAnimationRepeat(animator: Animator) {}
-        })
-        anim.start()
-        searchStatus = false
-    }
-
-    private fun EditText.openKeyboard() {
-        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
-        imm?.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
-    }
-
-    private fun EditText.closeKeyboard() {
-        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
-        imm?.hideSoftInputFromWindow(this.windowToken, 0)
+                override fun onAnimationCancel(animator: Animator) {}
+                override fun onAnimationRepeat(animator: Animator) {}
+            })
+            anim.start()
+        } else {
+            mLayoutSearchBar.visibility = View.GONE
+            mSearchBarBtnAction.isEnabled = true
+        }
     }
 }

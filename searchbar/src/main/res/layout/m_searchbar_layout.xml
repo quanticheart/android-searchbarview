@@ -6,27 +6,27 @@
     android:layout_height="?android:attr/actionBarSize">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/mSearchToolbar"
+        android:id="@+id/mLayoutToolbar"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/colorAccent"
+        android:background="@color/m_toolbar_color_search"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/menuToolbarSearch"
+            android:id="@+id/mSearchBarToolbar"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginRight="5dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/menuSearchTollbarControl"
+            app:layout_constraintRight_toLeftOf="@+id/mSearchBarControl1"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
-            android:id="@+id/menuSearchTollbarControl"
+            android:id="@+id/mSearchBarControl1"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_marginRight="10dp"
@@ -39,45 +39,44 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/mSearchToolbarLayout"
+        android:id="@+id/mLayoutSearchBar"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/white"
+        android:background="@color/m_toolbar_color_white"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible">
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-            android:id="@+id/menuSearchGo"
+            android:id="@+id/mLayoutSearchBarBack"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_marginLeft="10dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="4dp"
-            android:src="@drawable/m_ic_back"
+            android:src="@drawable/m_ic_back_searchbar"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="RtlHardcoded" />
 
         <EditText
-            android:id="@+id/mSearchEditText"
+            android:id="@+id/mLayoutSearchBarEditText"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:backgroundTint="@color/white"
-            android:hint="Search"
+            android:backgroundTint="@color/m_toolbar_color_white"
             android:imeOptions="actionSearch"
             android:inputType="text"
-            app:layout_constraintBottom_toBottomOf="@+id/mSearchToolbarLayout"
-            app:layout_constraintLeft_toRightOf="@+id/menuSearchGo"
-            app:layout_constraintRight_toLeftOf="@+id/menuSearchTollbarControl2"
-            app:layout_constraintTop_toTopOf="@+id/mSearchToolbarLayout" />
+            app:layout_constraintBottom_toBottomOf="@+id/mLayoutSearchBar"
+            app:layout_constraintLeft_toRightOf="@+id/mLayoutSearchBarBack"
+            app:layout_constraintRight_toLeftOf="@+id/mSearchBarControl2"
+            app:layout_constraintTop_toTopOf="@+id/mLayoutSearchBar"
+            tools:hint="Search" />
 
         <ImageView
-            android:id="@+id/menuSearchTollbarControl2"
+            android:id="@+id/mSearchBarControl2"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_marginRight="10dp"
@@ -90,25 +89,26 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageView
-        android:id="@+id/menuSearchCenter"
+        android:id="@+id/mSearchBarBtnActionCenter"
         android:layout_width="1dp"
         android:layout_height="1dp"
-        app:layout_constraintBottom_toBottomOf="@+id/menuSearch"
-        app:layout_constraintLeft_toLeftOf="@+id/menuSearch"
-        app:layout_constraintRight_toRightOf="@+id/menuSearch"
-        app:layout_constraintTop_toTopOf="@+id/menuSearch" />
+        app:layout_constraintBottom_toBottomOf="@+id/mSearchBarBtnAction"
+        app:layout_constraintLeft_toLeftOf="@+id/mSearchBarBtnAction"
+        app:layout_constraintRight_toRightOf="@+id/mSearchBarBtnAction"
+        app:layout_constraintTop_toTopOf="@+id/mSearchBarBtnAction"
+        tools:ignore="ContentDescription" />
 
     <ImageView
-        android:id="@+id/menuSearch"
+        android:id="@+id/mSearchBarBtnAction"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginRight="10dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:padding="4dp"
-        android:src="@drawable/m_search_bar_icon"
+        android:src="@drawable/m_ic_search_searchbar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="RtlHardcoded" />
+        tools:ignore="ContentDescription,RtlHardcoded" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
