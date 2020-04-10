@@ -101,7 +101,8 @@ class SearchBar @JvmOverloads constructor(
              * Status SearchBar
              */
             if (typedArray.hasValue(R.styleable.SearchBar_showSearch)) {
-                searchStatus = typedArray.getBoolean(R.styleable.SearchBar_showSearch, searchStatus)
+                val b = typedArray.getBoolean(R.styleable.SearchBar_showSearch, searchStatus)
+                searchStatus = !b
             }
 
             /**
@@ -188,7 +189,7 @@ class SearchBar @JvmOverloads constructor(
      */
 
     fun setSearchHint(hint: String) {
-        mLayoutSearchBarEditText?.hint = hint
+        mLayoutSearchBarEditText.hint = hint
     }
 
     fun setSearchTextOkListener(callback: (String) -> Unit) {
@@ -286,6 +287,8 @@ class SearchBar @JvmOverloads constructor(
             mLayoutSearchBar.visibility = View.VISIBLE
             anim.start()
         } else {
+            mLayoutSearchBarEditText.clearFocus()
+            mLayoutSearchBar.visibility = View.VISIBLE
             mLayoutToolbar.visibility = View.GONE
             mSearchBarBtnAction.isEnabled = true
         }
