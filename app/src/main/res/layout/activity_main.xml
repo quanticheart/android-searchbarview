@@ -10,8 +10,8 @@
     <com.quanticheart.searchbar.SearchBar
         android:id="@+id/searchToolbar"
         android:translationZ="5dp"
-        app:showSearch="true"
         app:searchHint="@string/app_name"
+        app:historySearch="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

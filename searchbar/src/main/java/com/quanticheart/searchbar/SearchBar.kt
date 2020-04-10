@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.TextView
+import com.quanticheart.searchbar.databaseSearch.DataBaseSearchBar
 import kotlinx.android.synthetic.main.m_searchbar_layout.view.*
 import kotlin.math.hypot
 
@@ -51,9 +52,9 @@ class SearchBar @JvmOverloads constructor(
     /**
      * Menu
      */
-    private var textChangeClickListener: ((String) -> Unit)? = null
+    private var textSendClickListener: ((String) -> Unit)? = null
+    private var textWatcherChangeListener: ((String) -> Unit)? = null
     private var callbackBackClickListener: (() -> Unit)? = null
-
 
     /**
      * Menu Actions Icons
@@ -61,6 +62,12 @@ class SearchBar @JvmOverloads constructor(
     private var iconSearch = R.drawable.m_ic_search_searchbar
     private var iconSearchClose = R.drawable.m_ic_close_searchbar
     private var iconBack = 0
+
+    /**
+     * DataBase
+     */
+    private var databaseEnable = false
+    private var database: DataBaseSearchBar? = null
 
     init {
         mInflater = LayoutInflater.from(context)
@@ -119,6 +126,16 @@ class SearchBar @JvmOverloads constructor(
             if (typedArray.hasValue(R.styleable.SearchBar_iconBack)) {
                 iconBack = typedArray.getResourceId(R.styleable.SearchBar_iconBack, 0)
             }
+
+            /**
+             * DataBase
+             */
+            if (typedArray.hasValue(R.styleable.SearchBar_historySearch)) {
+                databaseEnable = typedArray.getBoolean(R.styleable.SearchBar_historySearch, false)
+                if (databaseEnable) {
+                    database = DataBaseSearchBar(context)
+                }
+            }
             typedArray.recycle()
         }
 
@@ -133,7 +150,12 @@ class SearchBar @JvmOverloads constructor(
         setSearchHint(editTextHint)
 
         mLayoutSearchBarEditText.keyActionDoneListener {
-            textChangeClickListener?.let { it(mLayoutSearchBarEditText.text.toString()) }
+            textSendClickListener?.let {
+                sendText(
+                    mLayoutSearchBarEditText.text.toString(),
+                    databaseEnable
+                )
+            }
             showToolbar()
         }
 
@@ -150,7 +172,12 @@ class SearchBar @JvmOverloads constructor(
          * Search Go
          */
         mLayoutSearchBarBack.setOnClickListener {
-            textChangeClickListener?.let { it(mLayoutSearchBarEditText.text.toString()) }
+            textSendClickListener?.let {
+                sendText(
+                    mLayoutSearchBarEditText.text.toString(),
+                    databaseEnable
+                )
+            }
             showToolbar()
         }
 
@@ -193,16 +220,17 @@ class SearchBar @JvmOverloads constructor(
     }
 
     fun setSearchTextOkListener(callback: (String) -> Unit) {
-        textChangeClickListener = callback
+        textSendClickListener = callback
     }
 
     fun setSearchTextListener(callback: (String) -> Unit) {
+        textWatcherChangeListener = callback
         mLayoutSearchBarEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                callback(s.toString())
+                sendText(s.toString(), false)
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -335,6 +363,14 @@ class SearchBar @JvmOverloads constructor(
         } else {
             mLayoutSearchBar.visibility = View.GONE
             mSearchBarBtnAction.isEnabled = true
+        }
+    }
+
+    private fun sendText(searchText: String, databaseInsert: Boolean) {
+        textWatcherChangeListener?.let { it(searchText) }
+        textSendClickListener?.let { it(searchText) }
+        if (databaseInsert) {
+            database?.insertInHistory(searchText)
         }
     }
 }

@@ -9,5 +9,6 @@
         <attr name="toolbarTitle" format="string" />
         <attr name="backAction" format="boolean" />
         <attr name="iconBack" format="reference" />
+        <attr name="historySearch" format="boolean" />
     </declare-styleable>
 </resources>
