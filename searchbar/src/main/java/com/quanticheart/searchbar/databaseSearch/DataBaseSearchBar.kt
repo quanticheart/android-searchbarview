@@ -12,7 +12,7 @@ internal class DataBaseSearchBar(context: Context) : Dao(context) {
     private var tableName: String? = null
 
     init {
-        tableName = context.javaClass.name
+        tableName = context.javaClass.name.replace(".", "")
     }
 
     fun insertInHistory(searchText: String) {
@@ -41,14 +41,15 @@ internal class DataBaseSearchBar(context: Context) : Dao(context) {
         try {
             val sb = StringBuilder()
             sb.append(
-                "CREATE TABLE IF NOT EXISTS " + tableName + " (\n" +
-                        "  [${DaoConstants.databaseID}] INTEGER, \n" +
-                        "  [${DaoConstants.databaseSearchText}] INT NOT NULL, \n" +
+                "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
+                        "  [${DaoConstants.databaseID}] INTEGER," +
+                        "  [${DaoConstants.databaseSearchText}] INT NOT NULL," +
                         "  CONSTRAINT [] PRIMARY KEY([${DaoConstants.databaseID}]));"
             )
-            val commands = sb.toString().split(";").toTypedArray()
-            for (i in commands.indices) {
-                db?.execSQL(commands[i].toLowerCase(Locale.getDefault()))
+            val commands = sb.toString().split(";")
+            for (command in commands) {
+                if (command.isNotEmpty())
+                    db?.execSQL(command.toLowerCase(Locale.getDefault()))
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -61,8 +62,9 @@ internal class DataBaseSearchBar(context: Context) : Dao(context) {
             val sb = StringBuilder()
             sb.append("DROP TABLE IF EXISTS $tableName;")
             val commands = sb.toString().split(";").toTypedArray()
-            for (i in commands.indices) {
-                db?.execSQL(commands[i].toLowerCase(Locale.getDefault()))
+            for (command in commands) {
+                if (command.isNotEmpty())
+                    db?.execSQL(command.toLowerCase(Locale.getDefault()))
             }
         } catch (e: Exception) {
             e.printStackTrace()

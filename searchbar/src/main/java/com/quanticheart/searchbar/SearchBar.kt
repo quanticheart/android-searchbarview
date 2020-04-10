@@ -8,6 +8,7 @@ import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -150,12 +151,10 @@ class SearchBar @JvmOverloads constructor(
         setSearchHint(editTextHint)
 
         mLayoutSearchBarEditText.keyActionDoneListener {
-            textSendClickListener?.let {
-                sendText(
-                    mLayoutSearchBarEditText.text.toString(),
-                    databaseEnable
-                )
-            }
+            sendText(
+                mLayoutSearchBarEditText.text.toString(),
+                databaseEnable
+            )
             showToolbar()
         }
 
@@ -172,12 +171,10 @@ class SearchBar @JvmOverloads constructor(
          * Search Go
          */
         mLayoutSearchBarBack.setOnClickListener {
-            textSendClickListener?.let {
-                sendText(
-                    mLayoutSearchBarEditText.text.toString(),
-                    databaseEnable
-                )
-            }
+            sendText(
+                mLayoutSearchBarEditText.text.toString(),
+                databaseEnable
+            )
             showToolbar()
         }
 
@@ -371,6 +368,10 @@ class SearchBar @JvmOverloads constructor(
         textSendClickListener?.let { it(searchText) }
         if (databaseInsert) {
             database?.insertInHistory(searchText)
+            val list = database?.getHistoryList()
+            list?.let {
+                Log.e("LIST HISTORY", it.toString())
+            }
         }
     }
 }
