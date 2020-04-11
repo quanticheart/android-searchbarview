@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import com.quanticheart.searchbar.databaseSearch.dao.Dao
 import com.quanticheart.searchbar.databaseSearch.dao.DaoConstants
+import com.quanticheart.searchbar.databaseSearch.entity.SearchHistoryModel
 import java.util.*
 
 internal class DataBaseSearchBar(context: Context) : Dao(context) {
@@ -72,8 +73,8 @@ internal class DataBaseSearchBar(context: Context) : Dao(context) {
         close()
     }
 
-    fun getHistoryList(): ArrayList<String> {
-        val list = ArrayList<String>()
+    fun getHistoryList(): ArrayList<SearchHistoryModel> {
+        val list = ArrayList<SearchHistoryModel>()
         open()
         val cursor: Cursor?
         try {
@@ -81,7 +82,12 @@ internal class DataBaseSearchBar(context: Context) : Dao(context) {
             cursor = db?.rawQuery(commands.toLowerCase(Locale.getDefault()), null)
             cursor?.let {
                 while (cursor.moveToNext()) {
-                    list.add(cursor.getString(cursor.getColumnIndex(DaoConstants.databaseSearchText)))
+                    list.add(
+                        SearchHistoryModel(
+                            cursor.getInt(cursor.getColumnIndex(DaoConstants.databaseID)),
+                            cursor.getString(cursor.getColumnIndex(DaoConstants.databaseSearchText))
+                        )
+                    )
                 }
                 cursor.close()
             }
@@ -90,5 +96,17 @@ internal class DataBaseSearchBar(context: Context) : Dao(context) {
         }
         close()
         return list
+    }
+
+    fun deleteHistoryRowById(id: Int) {
+        open()
+        val cursor = db?.query(tableName, null, null, null, null, null, null)
+        cursor?.let {
+            if (cursor.moveToFirst()) {
+                db?.delete(tableName, DaoConstants.databaseID + "=?", arrayOf(id.toString()))
+            }
+            cursor.close()
+        }
+        close()
     }
 }

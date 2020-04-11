@@ -8,7 +8,6 @@ import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
-import android.util.Log
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -18,6 +17,7 @@ import android.widget.PopupWindow
 import android.widget.TextView
 import com.quanticheart.searchbar.databaseSearch.DataBaseSearchBar
 import com.quanticheart.searchbar.databaseSearch.HistorySearchAdapter
+import com.quanticheart.searchbar.databaseSearch.entity.SearchHistoryModel
 import kotlinx.android.synthetic.main.m_dialog_history.view.*
 import kotlinx.android.synthetic.main.m_searchbar_layout.view.*
 import kotlin.math.hypot
@@ -70,7 +70,7 @@ class SearchBar @JvmOverloads constructor(
      */
     private var databaseEnable = false
     private var databaseDialogEnable = true
-    private var databaseSearchList: ArrayList<String>? = null
+    private var databaseSearchList: ArrayList<SearchHistoryModel>? = null
     private var database: DataBaseSearchBar? = null
 
     init {
@@ -401,11 +401,7 @@ class SearchBar @JvmOverloads constructor(
                 databaseSearchList?.let { list ->
                     if (!list.contains(searchText.clearString())) {
                         database?.insertInHistory(searchText.clearString())
-                        list.add(0, searchText.clearString())
-                        val listBase = database?.getHistoryList()
-                        listBase?.let {
-                            Log.e("LIST HISTORY", it.toString())
-                        }
+                        createDatabaseList()
                     }
                 }
             }
@@ -432,7 +428,8 @@ class SearchBar @JvmOverloads constructor(
                     sendText(it, false)
                     showToolbar()
                 }, {
-
+                    database?.deleteHistoryRowById(it)
+                    createDatabaseList()
                 })
 
                 adapter.addList(list)
@@ -468,4 +465,11 @@ class SearchBar @JvmOverloads constructor(
     }
 
     private fun String.clearString(): String = this.replace("\\s+".toRegex(), " ")
+
+    private fun ArrayList<SearchHistoryModel>.contains(text: String): Boolean {
+        for (model in this) {
+            if (model.historyText == text) return true
+        }
+        return false
+    }
 }

@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.quanticheart.searchbar.R
+import com.quanticheart.searchbar.databaseSearch.entity.SearchHistoryModel
 import kotlinx.android.synthetic.main.m_cell_searchbar_history.view.*
 
 class HistorySearchAdapter(
@@ -15,7 +16,7 @@ class HistorySearchAdapter(
 ) :
     RecyclerView.Adapter<HistorySearchAdapter.HistoryViewHolder>() {
 
-    private val databaseList = ArrayList<String>()
+    private val databaseList = ArrayList<SearchHistoryModel>()
 
     init {
         recyclerView.apply {
@@ -36,27 +37,20 @@ class HistorySearchAdapter(
     override fun getItemCount(): Int = databaseList.size
 
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
-        holder.bind(databaseList[position])
+        holder.bind(databaseList[position].historyText)
         holder.itemView.setOnClickListener {
-            callbackSelect(databaseList[position])
+            callbackSelect(databaseList[position].historyText)
         }
         holder.itemView.mDeleteHistory.setOnClickListener {
-            callbackDelete(position)
+            callbackDelete(databaseList[position].id)
             databaseList.removeAt(position)
             notifyDataSetChanged()
         }
     }
 
-    fun addList(list: ArrayList<String>) {
+    fun addList(list: ArrayList<SearchHistoryModel>) {
         if (list.size > 0) {
             databaseList.addAll(list)
-            notifyDataSetChanged()
-        }
-    }
-
-    fun addNewHistory(searchText: String) {
-        if (searchText.isNotEmpty()) {
-            databaseList.add(searchText)
             notifyDataSetChanged()
         }
     }
