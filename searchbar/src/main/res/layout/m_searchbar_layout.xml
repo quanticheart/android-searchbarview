@@ -66,7 +66,7 @@
             android:id="@+id/mLayoutSearchBarEditText"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:backgroundTint="@color/m_toolbar_color_white"
+            android:backgroundTint="@android:color/transparent"
             android:imeOptions="actionSearch"
             android:inputType="text"
             app:layout_constraintBottom_toBottomOf="@+id/mLayoutSearchBar"
@@ -74,6 +74,21 @@
             app:layout_constraintRight_toLeftOf="@+id/mSearchBarControl2"
             app:layout_constraintTop_toTopOf="@+id/mLayoutSearchBar"
             tools:hint="Search" />
+
+        <ImageView
+            android:id="@+id/mSearchBarBtnMenu"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginRight="10dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="4dp"
+            android:src="@drawable/m_ic_search_menu"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/mSearchBarControl2"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="ContentDescription,RtlHardcoded"
+            tools:visibility="visible" />
 
         <ImageView
             android:id="@+id/mSearchBarControl2"

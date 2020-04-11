@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    app:cardBackgroundColor="@color/m_toolbar_color_white"
+    app:cardCornerRadius="10dp"
+    app:cardElevation="5dp"
+    app:cardUseCompatPadding="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingLeft="10dp"
+        android:paddingTop="5dp"
+        android:paddingRight="6dp"
+        android:paddingBottom="5dp"
+        tools:ignore="RtlHardcoded,UseCompoundDrawables">
+
+        <TextView
+            android:id="@+id/dialog_searchbar_menu_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/m_search_delete_history"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/mSearchBarBtnAction"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="4dp"
+            android:src="@drawable/m_ic_delete_all_history"
+            tools:ignore="ContentDescription" />
+
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

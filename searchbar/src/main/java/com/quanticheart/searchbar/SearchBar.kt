@@ -197,6 +197,13 @@ class SearchBar @JvmOverloads constructor(
 
         if (historyDialogStatus()) {
             createDatabaseList()
+
+            mSearchBarBtnMenu.setOnClickListener {
+                if (menuIsShowing())
+                    hideDialogDeleteHistory()
+                else
+                    showDialogDeleteHistory()
+            }
         }
 
         /**
@@ -356,12 +363,13 @@ class SearchBar @JvmOverloads constructor(
         }
 
         mLayoutSearchBarEditText.apply {
+            setText("")
             clearFocus()
             closeKeyboard()
         }
 
         if (historyDialogStatus())
-            hideDialogHistory()
+            closeAllDialogs()
 
         if (animation) {
             val x: Int = mSearchBarBtnActionCenter.x.toInt()
@@ -460,16 +468,71 @@ class SearchBar @JvmOverloads constructor(
     }
 
     private fun createDatabaseList() {
+        databaseSearchList?.clear()
         databaseSearchList = database?.getHistoryList()
-        databaseSearchList?.reverse()
+        if (databaseSearchList?.size ?: 0 > 0) {
+            databaseSearchList?.reverse()
+            mSearchBarBtnMenu.visibility = View.VISIBLE
+        } else
+            mSearchBarBtnMenu.visibility = View.GONE
     }
 
-    private fun String.clearString(): String = this.replace("\\s+".toRegex(), " ")
+    private fun String.clearString(): String = this.replace("\\s+".toRegex(), " ").trim()
 
     private fun ArrayList<SearchHistoryModel>.contains(text: String): Boolean {
         for (model in this) {
             if (model.historyText == text) return true
         }
         return false
+    }
+
+    /**
+     * Dialog delete history
+     */
+
+    private var dialogMenuHistory: PopupWindow? = null
+
+    private fun showDialogDeleteHistory() {
+        val view: View =
+            LayoutInflater.from(context)
+                .inflate(R.layout.m_dialog_history_clear_history, mLayoutToolbar, false)
+
+        view.setOnClickListener {
+            database?.deleteTable()
+            createDatabaseList()
+            closeAllDialogs()
+        }
+
+        dialogMenuHistory = PopupWindow(
+            view,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            false
+        )
+
+        dialogMenuHistory?.apply {
+            elevation = 5f
+            isFocusable = false
+            isOutsideTouchable = false
+            softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+            inputMethodMode = PopupWindow.INPUT_METHOD_NEEDED
+            showAsDropDown(mSearchBarBtnMenu, Gravity.CENTER, 0, 0)
+        }
+    }
+
+    private fun menuIsShowing(): Boolean = dialogMenuHistory?.isShowing ?: false
+
+    private fun hideDialogDeleteHistory() {
+        dialogMenuHistory?.dismiss()
+        dialogMenuHistory = null
+    }
+
+    /**
+     * Close all dialogs
+     */
+
+    private fun closeAllDialogs() {
+        hideDialogDeleteHistory()
+        hideDialogHistory()
     }
 }
