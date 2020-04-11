@@ -11,7 +11,7 @@
         android:id="@+id/searchToolbar"
         android:translationZ="5dp"
         app:searchHint="@string/app_name"
-        app:historySearch="true"
+        app:historySearchDatabase="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

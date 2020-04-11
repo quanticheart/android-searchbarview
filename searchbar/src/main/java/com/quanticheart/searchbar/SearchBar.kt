@@ -9,18 +9,19 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.util.Log
-import android.view.KeyEvent
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewAnimationUtils
+import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.PopupWindow
 import android.widget.TextView
 import com.quanticheart.searchbar.databaseSearch.DataBaseSearchBar
+import com.quanticheart.searchbar.databaseSearch.HistorySearchAdapter
+import kotlinx.android.synthetic.main.m_dialog_history.view.*
 import kotlinx.android.synthetic.main.m_searchbar_layout.view.*
 import kotlin.math.hypot
+
 
 class SearchBar @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -68,6 +69,8 @@ class SearchBar @JvmOverloads constructor(
      * DataBase
      */
     private var databaseEnable = false
+    private var databaseDialogEnable = true
+    private var databaseSearchList: ArrayList<String>? = null
     private var database: DataBaseSearchBar? = null
 
     init {
@@ -131,11 +134,21 @@ class SearchBar @JvmOverloads constructor(
             /**
              * DataBase
              */
-            if (typedArray.hasValue(R.styleable.SearchBar_historySearch)) {
-                databaseEnable = typedArray.getBoolean(R.styleable.SearchBar_historySearch, false)
+            if (typedArray.hasValue(R.styleable.SearchBar_historySearchDatabase)) {
+                databaseEnable = typedArray.getBoolean(
+                    R.styleable.SearchBar_historySearchDatabase,
+                    databaseEnable
+                )
                 if (databaseEnable) {
                     database = DataBaseSearchBar(context)
                 }
+            }
+
+            if (typedArray.hasValue(R.styleable.SearchBar_historySearchDialog)) {
+                databaseDialogEnable = typedArray.getBoolean(
+                    R.styleable.SearchBar_historySearchDialog,
+                    databaseDialogEnable
+                )
             }
             typedArray.recycle()
         }
@@ -176,6 +189,14 @@ class SearchBar @JvmOverloads constructor(
                 databaseEnable
             )
             showToolbar()
+        }
+
+        /**
+         * DataBase dialog
+         */
+
+        if (historyDialogStatus()) {
+            createDatabaseList()
         }
 
         /**
@@ -289,6 +310,9 @@ class SearchBar @JvmOverloads constructor(
             openKeyboard()
         }
 
+        if (historyDialogStatus())
+            showDialogHistory()
+
         if (animation) {
             val x: Int = mSearchBarBtnActionCenter.x.toInt()
             val y: Int = mSearchBarBtnActionCenter.y.toInt()
@@ -336,6 +360,9 @@ class SearchBar @JvmOverloads constructor(
             closeKeyboard()
         }
 
+        if (historyDialogStatus())
+            hideDialogHistory()
+
         if (animation) {
             val x: Int = mSearchBarBtnActionCenter.x.toInt()
             val y: Int = mSearchBarBtnActionCenter.y.toInt()
@@ -363,15 +390,82 @@ class SearchBar @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Send action
+     */
     private fun sendText(searchText: String, databaseInsert: Boolean) {
-        textWatcherChangeListener?.let { it(searchText) }
-        textSendClickListener?.let { it(searchText) }
-        if (databaseInsert) {
-            database?.insertInHistory(searchText)
-            val list = database?.getHistoryList()
-            list?.let {
-                Log.e("LIST HISTORY", it.toString())
+        if (searchText.isNotEmpty()) {
+            textWatcherChangeListener?.let { it(searchText) }
+            textSendClickListener?.let { it(searchText) }
+            if (databaseInsert) {
+                databaseSearchList?.let { list ->
+                    if (!list.contains(searchText.clearString())) {
+                        database?.insertInHistory(searchText.clearString())
+                        list.add(0, searchText.clearString())
+                        val listBase = database?.getHistoryList()
+                        listBase?.let {
+                            Log.e("LIST HISTORY", it.toString())
+                        }
+                    }
+                }
             }
         }
     }
+
+    /**
+     * History Dialog
+     */
+
+    private fun historyDialogStatus(): Boolean = databaseEnable && databaseDialogEnable
+
+    private var dialogHistory: PopupWindow? = null
+
+    private fun showDialogHistory() {
+        databaseSearchList?.let { list ->
+            dialogHistory?.let {
+                dialogHistory?.showAsDropDown(mLayoutToolbar, Gravity.CENTER, 0, 0)
+            } ?: run {
+                val view = LayoutInflater.from(context)
+                    .inflate(R.layout.m_dialog_history, mLayoutToolbar, false)
+
+                val adapter = HistorySearchAdapter(view.mListHistorySearchBar, {
+                    sendText(it, false)
+                    showToolbar()
+                }, {
+
+                })
+
+                adapter.addList(list)
+
+                dialogHistory =
+                    PopupWindow(
+                        view,
+                        mLayoutToolbar.width,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        true
+                    )
+                dialogHistory?.apply {
+                    elevation = 5f
+                    isFocusable = false
+                    isOutsideTouchable = false
+                    softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+                    inputMethodMode = PopupWindow.INPUT_METHOD_NEEDED
+                    showAsDropDown(mLayoutToolbar, Gravity.CENTER, 0, 0)
+                }
+            }
+        }
+
+    }
+
+    private fun hideDialogHistory() {
+        dialogHistory?.dismiss()
+        dialogHistory = null
+    }
+
+    private fun createDatabaseList() {
+        databaseSearchList = database?.getHistoryList()
+        databaseSearchList?.reverse()
+    }
+
+    private fun String.clearString(): String = this.replace("\\s+".toRegex(), " ")
 }

@@ -8,7 +8,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.quanticheart.searchbar.R
 import kotlinx.android.synthetic.main.m_cell_searchbar_history.view.*
 
-class HistorySearchAdapter(private val recyclerView: RecyclerView) :
+class HistorySearchAdapter(
+    private val recyclerView: RecyclerView,
+    private val callbackSelect: (String) -> Unit,
+    private val callbackDelete: (Int) -> Unit
+) :
     RecyclerView.Adapter<HistorySearchAdapter.HistoryViewHolder>() {
 
     private val databaseList = ArrayList<String>()
@@ -33,6 +37,14 @@ class HistorySearchAdapter(private val recyclerView: RecyclerView) :
 
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
         holder.bind(databaseList[position])
+        holder.itemView.setOnClickListener {
+            callbackSelect(databaseList[position])
+        }
+        holder.itemView.mDeleteHistory.setOnClickListener {
+            callbackDelete(position)
+            databaseList.removeAt(position)
+            notifyDataSetChanged()
+        }
     }
 
     fun addList(list: ArrayList<String>) {
@@ -52,6 +64,7 @@ class HistorySearchAdapter(private val recyclerView: RecyclerView) :
     inner class HistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(label: String) {
             itemView.mLabelHistory.text = label
+
         }
     }
 }

@@ -2,4 +2,5 @@
 <resources>
     <color name="m_toolbar_color_white">#ffffff</color>
     <color name="m_toolbar_color_search">#999999</color>
+    <color name="m_default_color_icon">#CCCCCC</color>
 </resources>
