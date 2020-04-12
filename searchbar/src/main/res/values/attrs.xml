@@ -11,5 +11,6 @@
         <attr name="iconBack" format="reference" />
         <attr name="historySearchDatabase" format="boolean" />
         <attr name="historySearchDialog" format="boolean" />
+        <attr name="showGoogleSpeech" format="boolean" />
     </declare-styleable>
 </resources>

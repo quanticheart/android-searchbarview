@@ -49,16 +49,15 @@ class HistorySearchAdapter(
     }
 
     fun addList(list: ArrayList<SearchHistoryModel>) {
-        if (list.size > 0) {
-            databaseList.addAll(list)
-            notifyDataSetChanged()
-        }
+        databaseList.clear()
+        notifyDataSetChanged()
+        databaseList.addAll(list)
+        notifyDataSetChanged()
     }
 
     inner class HistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(label: String) {
             itemView.mLabelHistory.text = label
-
         }
     }
 }

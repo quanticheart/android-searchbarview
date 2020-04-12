@@ -20,6 +20,8 @@ import com.quanticheart.searchbar.databaseSearch.HistorySearchAdapter
 import com.quanticheart.searchbar.databaseSearch.entity.SearchHistoryModel
 import kotlinx.android.synthetic.main.m_dialog_history.view.*
 import kotlinx.android.synthetic.main.m_searchbar_layout.view.*
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.hypot
 
 
@@ -72,6 +74,12 @@ class SearchBar @JvmOverloads constructor(
     private var databaseDialogEnable = true
     private var databaseSearchList: ArrayList<SearchHistoryModel>? = null
     private var database: DataBaseSearchBar? = null
+
+    /**
+     * Google Speech
+     */
+
+    private var googleSpeech = true
 
     init {
         mInflater = LayoutInflater.from(context)
@@ -150,6 +158,18 @@ class SearchBar @JvmOverloads constructor(
                     databaseDialogEnable
                 )
             }
+
+            /**
+             * Google Speech
+             */
+
+            if (typedArray.hasValue(R.styleable.SearchBar_showGoogleSpeech)) {
+                googleSpeech = typedArray.getBoolean(
+                    R.styleable.SearchBar_showGoogleSpeech,
+                    googleSpeech
+                )
+            }
+
             typedArray.recycle()
         }
 
@@ -207,6 +227,14 @@ class SearchBar @JvmOverloads constructor(
         }
 
         /**
+         * Google Speech
+         */
+
+        if (googleSpeech) {
+
+        }
+
+        /**
          * init
          */
         if (searchStatus) showToolbar(false) else showSearchBar(false)
@@ -255,10 +283,10 @@ class SearchBar @JvmOverloads constructor(
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                sendText(s.toString(), false)
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                sendText(s.toString(), false)
             }
         })
     }
@@ -402,7 +430,8 @@ class SearchBar @JvmOverloads constructor(
      * Send action
      */
     private fun sendText(searchText: String, databaseInsert: Boolean) {
-        if (searchText.isNotEmpty()) {
+        filterHistoryList(searchText.clearString())
+        if (searchText.clearString().isNotEmpty()) {
             textWatcherChangeListener?.let { it(searchText) }
             textSendClickListener?.let { it(searchText) }
             if (databaseInsert) {
@@ -423,6 +452,7 @@ class SearchBar @JvmOverloads constructor(
     private fun historyDialogStatus(): Boolean = databaseEnable && databaseDialogEnable
 
     private var dialogHistory: PopupWindow? = null
+    private var historyAdapter: HistorySearchAdapter? = null
 
     private fun showDialogHistory() {
         databaseSearchList?.let { list ->
@@ -432,7 +462,7 @@ class SearchBar @JvmOverloads constructor(
                 val view = LayoutInflater.from(context)
                     .inflate(R.layout.m_dialog_history, mLayoutToolbar, false)
 
-                val adapter = HistorySearchAdapter(view.mListHistorySearchBar, {
+                historyAdapter = HistorySearchAdapter(view.mListHistorySearchBar, {
                     sendText(it, false)
                     showToolbar()
                 }, {
@@ -440,7 +470,7 @@ class SearchBar @JvmOverloads constructor(
                     createDatabaseList()
                 })
 
-                adapter.addList(list)
+                historyAdapter?.addList(list)
 
                 dialogHistory =
                     PopupWindow(
@@ -534,5 +564,27 @@ class SearchBar @JvmOverloads constructor(
     private fun closeAllDialogs() {
         hideDialogDeleteHistory()
         hideDialogHistory()
+    }
+
+    /**
+     * Filter database
+     */
+    private fun filterHistoryList(name: String) {
+        databaseSearchList?.let {
+            if (name.isEmpty()) {
+                historyAdapter?.addList(it)
+            } else {
+                val filterList = ArrayList<SearchHistoryModel>()
+                for (history in it) {
+                    if (history.historyText.toLowerCase(Locale.getDefault()).contains(
+                            name.toLowerCase(Locale.getDefault())
+                        )
+                    ) {
+                        filterList.add(history)
+                    }
+                }
+                historyAdapter?.addList(filterList)
+            }
+        }
     }
 }
